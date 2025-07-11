@@ -10,6 +10,8 @@ from torch import nn
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader, TensorDataset
 
+import torch_sequential
+
 doTraining = True
 # doTraining = False
 
@@ -34,29 +36,6 @@ x_mean, x_std = x.mean(axis=0), x.std(axis=0)
 
 x = (x - x_mean) / x_std
 x_lb, x_ub = x.min(axis=0), x.max(axis=0)
-
-
-class NeuralNetwork(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.l1 = nn.Linear(4, 10)
-        self.l2 = nn.Linear(10, 10)
-        self.l3 = nn.Linear(10, 15)
-        self.l4 = nn.Linear(15, 1)
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, x):
-        relu = nn.ReLU()
-        x = self.l1(x)
-        x = relu(x)
-        x = self.l2(x)
-        x = relu(x)
-        x = self.l3(x)
-        x = relu(x)
-        x = self.l4(x)
-        x = self.sigmoid(x)
-        return x
-
 
 if doTraining:
     x = torch.Tensor(x)
@@ -111,7 +90,16 @@ if doTraining:
             )
         )
 
-    model = NeuralNetwork()
+    model = nn.Sequential(
+        nn.Linear(4, 10),
+        nn.ReLU(),
+        nn.Linear(10, 10),
+        nn.ReLU(),
+        nn.Linear(10, 15),
+        nn.ReLU(),
+        nn.Linear(15, 1),
+        nn.Sigmoid()
+    )
 
     optimizer = optim.Adadelta(model.parameters(), lr=1)
 
@@ -148,23 +136,7 @@ def getActive(v: gp.Variable):
 
 m = gp.Container()
 
-with torch.no_grad():
-    relu = gp.math.relu_with_binary_var
-
-    lin1 = gp.formulations.Linear(m, in_features=4, out_features=10)
-    lin1.load_weights(model.l1.weight.numpy(), model.l1.bias.numpy())
-
-    lin2 = gp.formulations.Linear(m, in_features=10, out_features=10)
-    lin2.load_weights(model.l2.weight.numpy(), model.l2.bias.numpy())
-
-    lin3 = gp.formulations.Linear(m, in_features=10, out_features=15)
-    lin3.load_weights(model.l3.weight.numpy(), model.l3.bias.numpy())
-
-    lin4 = gp.formulations.Linear(m, in_features=15, out_features=1)
-    lin4.load_weights(model.l4.weight.numpy(), model.l4.bias.numpy())
-
 a0 = gp.Variable(m, name="a0", domain=gp.math.dim([4]))  # input to neural network
-
 a1 = gp.Variable(m, name="a1", domain=gp.math.dim([4]))  # normalized
 
 x_mean_par = gp.Parameter(
@@ -190,16 +162,10 @@ a1.lo[...] = a1_lb
 a1.up[...] = a1_ub
 
 
-z2, _ = lin1(a1)
-a2, _ = relu(z2)
+drop_sigmoid_model = nn.Sequential(*list(model.children())[:-1])
 
-z3, _ = lin2(a2)
-a3, _ = relu(z3)
-
-z4, _ = lin3(a3)
-a4, _ = relu(z4)
-
-z5, _ = lin4(a4)
+seq_formulation = torch_sequential.TorchSequential(m, drop_sigmoid_model)
+z5, _ = seq_formulation(a1)
 
 check_feasibility = gp.Equation(m, name="check_feasibility")
 check_feasibility[...] = z5[0] >= 4.59511985013459  # 0.99 probability
