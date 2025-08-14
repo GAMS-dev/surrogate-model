@@ -2,6 +2,8 @@
 
 This [GAMSPy](https://gamspy.readthedocs.io/en/latest/index.html) example shows how to embed a trained neural network into a GAMSPy optimization model (a mixed-integer linear program in this case) by utilizing the new sub-package [formulations](https://gamspy.readthedocs.io/en/latest/reference/gamspy.formulations.html) in GAMSPy.
 
+More infos and examples on machine learning related capabilities of GAMSPy can be found in the GAMSPy user guide section on [GAMSPy and machine learning](https://gamspy.readthedocs.io/en/latest/user/ml/ml.html#gamspy-and-machine-learning).
+
 ## Quick start
 
 If needed, setup a virtual environment or switch into a pre-existing one and install all packages from `requirements.txt`.
