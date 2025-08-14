@@ -10,8 +10,6 @@ from torch import nn
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader, TensorDataset
 
-import torch_sequential
-
 doTraining = True
 # doTraining = False
 
@@ -164,7 +162,7 @@ a1.up[...] = a1_ub
 
 drop_sigmoid_model = nn.Sequential(*list(model.children())[:-1])
 
-seq_formulation = torch_sequential.TorchSequential(m, drop_sigmoid_model)
+seq_formulation = gp.formulations.TorchSequential(m, drop_sigmoid_model)
 z5, _ = seq_formulation(a1)
 
 check_feasibility = gp.Equation(m, name="check_feasibility")
