@@ -17,3 +17,11 @@ python main.py
 ```
 
 The NN is trained on the first run and saved to disk as `rs.pth`. Subsequent runs skip the training and only solve the optimization model.
+
+## Model formulation
+
+<img src="images/mip-formulation.png" alt="mixed-integer linear program formulation" width="640"/>
+
+The objective function computes the total cost incurred by the choice of reactor $r$ and selector $s$ plus the cost for the input material flow rate $F_a$. The first constraints ensure exactly one reactor and exactly one separator is chosen. Following equation links the auxiliary variable $V$ for the available volume with the volume of the chosen reactor. The next constraint uses the embedded NN to predict a feasibility probability for a given tuple of reactor volume $V$, input flow rate $F_a$ and output material flow rate demands $F_B$ and $F_E$. The feasibility prediction acquired through NN inference must be at least 99\%. Subsequent equations make sure the input material flow rate is inside the operational bounds of the chosen selector using a bigM-formulation. The decision variable domains are declared such that the input material flow rate and available volume auxiliary variable are continuous, and the reactor- $y_r$ and selector-choice $y_s$ indicator variables are binary.
+
+To solve the model with a MILP solver, the parameterized NN term $NN$ in must be expanded into a set of additional constraints and variables, such that the left-hand side of evaluates to the value acquired by doing a forward propagation of input vector $(V,F_a,F_B,F_E)$ through the network layers. The NN is sequential and consists of 4 linear layers connected with ReLU and sigmoid as activation functions for the inner layers and output layer respectively.
