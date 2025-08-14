@@ -3,6 +3,7 @@ import pandas as pd
 
 import numpy as np
 import sys
+import os
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -10,14 +11,13 @@ from torch import nn
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader, TensorDataset
 
-doTraining = True
-# doTraining = False
+doTraining = not os.path.isfile('rs.pth')
 
 dfs = []
 
 for letter in ["a", "b"]:
     for num in [1, 2, 3, 4]:
-        name = f"{letter}_{num}.csv"
+        name = f"data/{letter}_{num}.csv"
         dfs.append(pd.read_csv(name))
 
 df = pd.concat(dfs)
