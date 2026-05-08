@@ -214,7 +214,7 @@ separator_max = gp.Parameter(
 
 separator_bigM = gp.Parameter(m, domain=[separators])
 separator_bigM[separators] = (
-    separator_max.records.max().value - separator_max[separators]
+    float(separator_max.getMaxValue()) - separator_max[separators]
 )
 
 cost = gp.Variable(m, name="cost")
