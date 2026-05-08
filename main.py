@@ -118,7 +118,7 @@ else:
 def getActive(v: gp.Variable):
     label = "??label??"
     found = False
-    for _, row in v.records.iterrows():
+    for _, row in v.records.iterrows(): # type: ignore
         rval = round(row.iloc[1], 3)
         if 0 == rval:
             continue
