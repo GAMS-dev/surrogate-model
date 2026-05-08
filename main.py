@@ -27,7 +27,7 @@ output_col = ["ok"]
 
 
 x = df[input_cols].to_numpy()
-y = df[output_col].to_numpy()
+y = df[output_col].to_numpy().copy()
 
 
 x_mean, x_std = x.mean(axis=0), x.std(axis=0)
