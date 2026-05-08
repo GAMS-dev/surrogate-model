@@ -323,4 +323,4 @@ plt.xticks(rotation=0)
 plt.yticks(rotation=0)
 
 print("And finally the heatmap . . .")
-plt.show()
+plt.savefig('heatmap.png')
